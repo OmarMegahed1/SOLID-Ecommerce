@@ -54,17 +54,4 @@ public class OrderService : IOrderService
         var orders = await _readOrders.GetOrdersAsync(userId, page, pageSize, cancellationToken);
         return new SuccessResult<Paged<Order>>(orders.Map());
     }
-
-    public async Task<Result<IEnumerable<OrderReport>>> GetOrderReportAsync(DateTime from, DateTime to, ReportInterval reportInterval, CancellationToken cancellationToken)
-    {
-        var report = await _readOrders.GetOrderReportAsync(from, to, cancellationToken);
-
-        return reportInterval switch
-        {
-            ReportInterval.Day => new SuccessResult<IEnumerable<OrderReport>>(report.MapDays()),
-            ReportInterval.Month => new SuccessResult<IEnumerable<OrderReport>>(report.MapMonths()),
-            ReportInterval.Year => new SuccessResult<IEnumerable<OrderReport>>(report.MapYears()),
-            _ => throw new ArgumentException("Invalid report interval specified"),
-        };
-    }
 }

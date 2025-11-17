@@ -16,16 +16,16 @@ namespace Store.Api.Controllers;
 public class AdminController : BaseController<User>
 {
     private readonly IUserService _userService;
-    private readonly IOrderService _orderService;
+    private readonly IReportService _reportService;
     private readonly IValidator<CreateUserRequest> _createUserValidator;
     public AdminController(
         IUserService userService,
-        IOrderService orderService,
+        IReportService reportService,
         IValidator<CreateUserRequest> createUserValidator
     )
     {
         _userService = userService.NotNull();
-        _orderService = orderService.NotNull();
+        _reportService = reportService.NotNull();
         _createUserValidator = createUserValidator.NotNull();
     }
 
@@ -72,7 +72,7 @@ public class AdminController : BaseController<User>
         if (!Enum.TryParse(interval, out ReportInterval reportInterval))
             reportInterval = ReportInterval.Day;
 
-        var result = await _orderService.GetOrderReportAsync(fromDate, toDate, reportInterval, cancellationToken);
+        var result = await _reportService.GetOrderReportAsync(fromDate, toDate, reportInterval, cancellationToken);
         return Results.Ok(result.Data.Map());
     }
 }
