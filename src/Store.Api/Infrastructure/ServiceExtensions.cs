@@ -2,6 +2,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using Store.Api.Contracts.Requests;
 using Store.Api.Contracts.Validators;
 using Store.Api.Security;
@@ -72,6 +73,7 @@ public static class ServiceExtensions
 
     public static IServiceCollection AddValidators(this IServiceCollection services)
     {
+        services.AddFluentValidationAutoValidation();
         services.AddScoped<IValidator<CartRequest>, CartRequestValidator>();
         services.AddScoped<IValidator<ItemRequest>, ItemRequestValidator>();
         services.AddScoped<IValidator<OrderRequest>, OrderRequestValidator>();

@@ -13,24 +13,15 @@ public class AuthController : ControllerBase
 {
     private readonly TokenService _tokenService;
 
-    private readonly IValidator<AuthRequest> _authValidator;
-
-    public AuthController(TokenService tokenService, IValidator<AuthRequest> authValidator)
+    public AuthController(TokenService tokenService)
     {
         _tokenService = tokenService.NotNull();
-        _authValidator = authValidator.NotNull();
     }
 
     [HttpPost]
     [AllowAnonymous]
     public async Task<IResult> CreateToken([FromBody] AuthRequest userRequest, CancellationToken cancellationToken = default)
     {
-        var validationResult = await _authValidator.ValidateAsync(userRequest, cancellationToken);
-
-        if (!validationResult.IsValid)
-            return Results.ValidationProblem(validationResult.ToDictionary());
-
-
         var token = await _tokenService.CreateTokenAsync(userRequest.Email, userRequest.Password, cancellationToken);
         if (token != null)
             return Results.Ok(token);
