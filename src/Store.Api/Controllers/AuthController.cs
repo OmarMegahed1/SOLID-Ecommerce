@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Store.Api.Contracts.Requests;
 using Store.Common.Helpers;
 using Store.Api.Security;
+using FluentValidation;
 
 namespace Store.Api.Controllers;
 
@@ -12,23 +13,23 @@ public class AuthController : ControllerBase
 {
     private readonly TokenService _tokenService;
 
-    public AuthController(TokenService tokenService)
+    private readonly IValidator<AuthRequest> _authValidator;
+
+    public AuthController(TokenService tokenService, IValidator<AuthRequest> authValidator)
     {
         _tokenService = tokenService.NotNull();
+        _authValidator = authValidator.NotNull();
     }
 
     [HttpPost]
     [AllowAnonymous]
     public async Task<IResult> CreateToken([FromBody] AuthRequest userRequest, CancellationToken cancellationToken = default)
     {
-        var validationResult = new Dictionary<string, string[]>();
-        if (userRequest == null || string.IsNullOrWhiteSpace(userRequest.Email))
-            validationResult.Add("Email", new[] { "Email must not be empty" });
-        if (userRequest == null || string.IsNullOrWhiteSpace(userRequest.Password))
-            validationResult.Add("Password", new[] { "Password must not be empty" });
+        var validationResult = await _authValidator.ValidateAsync(userRequest, cancellationToken);
 
-        if (validationResult.Any())
-            return Results.ValidationProblem(validationResult);
+        if (!validationResult.IsValid)
+            return Results.ValidationProblem(validationResult.ToDictionary());
+
 
         var token = await _tokenService.CreateTokenAsync(userRequest.Email, userRequest.Password, cancellationToken);
         if (token != null)
