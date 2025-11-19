@@ -2,6 +2,7 @@ using Store.Application.Mappers;
 using Store.Application.Models;
 using Store.Common.Results;
 using Store.Infrastructure.Data;
+using Store.Common.Helpers;
 
 namespace Store.Application.Services;
 
@@ -10,12 +11,14 @@ public class OrderService : IOrderService
     private readonly IReadOrders _readOrders;
     private readonly IWriteOrder _writeOrder;
     private readonly IReadCart _readCart;
+    private readonly ITaxCalculator _taxCalculator;
 
-    public OrderService(IReadOrders readOrders, IWriteOrder writeOrder, IReadCart readCart)
+    public OrderService(IReadOrders readOrders, IWriteOrder writeOrder, IReadCart readCart, ITaxCalculator taxCalculator)
     {
-        _readOrders = readOrders ?? throw new ArgumentNullException(nameof(readOrders));
-        _writeOrder = writeOrder ?? throw new ArgumentNullException(nameof(writeOrder));
-        _readCart = readCart ?? throw new ArgumentNullException(nameof(readCart));
+        _readOrders = readOrders.NotNull();
+        _writeOrder = writeOrder.NotNull();
+        _readCart = readCart.NotNull();
+        _taxCalculator = taxCalculator.NotNull();
     }
 
     public async Task<Result<Order>> CreateOrderAsync(int userId, int cartId, CancellationToken cancellationToken)
@@ -29,8 +32,9 @@ public class OrderService : IOrderService
             UserId = userId,
             Items = cart.Items.Select(x => x.Map()),
             DeliveryCost = 3.99m,
-            Tax = 0
         };
+
+        newOrder.Tax = _taxCalculator.CalculateTax(newOrder, null);
 
         var orderId = await _writeOrder.CreateOrderAsync(newOrder.Map(), cancellationToken);
         if (orderId == null)
