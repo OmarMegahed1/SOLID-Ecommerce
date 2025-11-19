@@ -8,6 +8,13 @@ public class TaxCalculator : ITaxCalculator
         var orderTotal = order.Items.Sum(x => x.Quantity * x.Product.Price);
         var totalToTax = orderTotal + order.DeliveryCost;
 
-        return totalToTax * 0.20m;
+        var taxRate = user.CountryCode switch
+        {
+            "GBR" => 0.20m,
+            "AUS" => 0.10m,
+            _ => 0
+        };
+
+        return totalToTax * taxRate;
     }
 }
