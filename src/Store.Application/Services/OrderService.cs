@@ -11,14 +11,16 @@ public class OrderService : IOrderService
     private readonly IReadOrders _readOrders;
     private readonly IWriteOrder _writeOrder;
     private readonly IReadCart _readCart;
-    private readonly ITaxCalculator _taxCalculator;
+    private readonly ITaxCalculatorFactory _taxCalculatorFactory;
+    private readonly IUserService _userService;
 
-    public OrderService(IReadOrders readOrders, IWriteOrder writeOrder, IReadCart readCart, ITaxCalculator taxCalculator)
+    public OrderService(IReadOrders readOrders, IWriteOrder writeOrder, IReadCart readCart, ITaxCalculatorFactory taxCalculatorFactory, IUserService userService)
     {
         _readOrders = readOrders.NotNull();
         _writeOrder = writeOrder.NotNull();
         _readCart = readCart.NotNull();
-        _taxCalculator = taxCalculator.NotNull();
+        _taxCalculatorFactory = taxCalculatorFactory.NotNull();
+        _userService = userService.NotNull();
     }
 
     public async Task<Result<Order>> CreateOrderAsync(int userId, int cartId, CancellationToken cancellationToken)
@@ -34,7 +36,10 @@ public class OrderService : IOrderService
             DeliveryCost = 3.99m,
         };
 
-        newOrder.Tax = _taxCalculator.CalculateTax(newOrder, null);
+        var user = await _userService.GetUserAsync(userId, cancellationToken);
+        var taxCalculator = _taxCalculatorFactory.GetCalculatorInstance(user.Data.CountryCode);
+
+        newOrder.Tax = taxCalculator.CalculateTax(newOrder, null);
 
         var orderId = await _writeOrder.CreateOrderAsync(newOrder.Map(), cancellationToken);
         if (orderId == null)

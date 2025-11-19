@@ -19,7 +19,8 @@ public static class ServiceExtensions
         services.AddTransient<IReportService, ReportService>();
         services.AddTransient<IPasswordService, PasswordService>();
         services.AddTransient<IPasswordHasher<User>, PasswordHasher<User>>();
-        services.AddTransient<ITaxCalculator, TaxCalculator>();
+        services.AddTransient<ITaxCalculator, UkTaxCalculator>();
+        services.AddTransient<ITaxCalculatorFactory, TaxCalculatorFactory>();
         return services;
     }
 }
