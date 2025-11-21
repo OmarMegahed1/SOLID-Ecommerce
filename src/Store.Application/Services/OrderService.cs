@@ -29,6 +29,9 @@ public class OrderService : IOrderService
         if (cart == null)
             return new InvalidResult<Order>("InvalidCart", new[] { new Error("missing_cart", $"Cart with id {cartId} does not exist.") });
 
+        var user = await _userService.GetUserAsync(userId, cancellationToken);
+        var taxCalculator = _taxCalculatorFactory.GetCalculatorInstance(user.Data.CountryCode);
+
         var newOrder = new Order
         {
             UserId = userId,
@@ -36,10 +39,7 @@ public class OrderService : IOrderService
             DeliveryCost = 3.99m,
         };
 
-        var user = await _userService.GetUserAsync(userId, cancellationToken);
-        var taxCalculator = _taxCalculatorFactory.GetCalculatorInstance(user.Data.CountryCode);
-
-        newOrder.Tax = taxCalculator.CalculateTax(newOrder, null);
+        newOrder.Tax = taxCalculator.CalculateTax(newOrder, user.Data);
 
         var orderId = await _writeOrder.CreateOrderAsync(newOrder.Map(), cancellationToken);
         if (orderId == null)
