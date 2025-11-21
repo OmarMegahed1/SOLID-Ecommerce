@@ -10,4 +10,5 @@ public class AustraliaTaxCalculator : ITaxCalculator
 
         return totalToTax * 0.10m;
     }
+    public bool CanHandle(string countryCode) => countryCode == "AUS";
 }

@@ -10,4 +10,5 @@ public class UkTaxCalculator : ITaxCalculator
 
         return totalToTax * 0.20m;
     }
+    public bool CanHandle(string countryCode) => countryCode == "GBR";
 }

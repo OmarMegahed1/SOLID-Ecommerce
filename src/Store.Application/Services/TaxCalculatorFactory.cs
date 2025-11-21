@@ -1,11 +1,22 @@
+using Store.Common.Helpers;
+
 namespace Store.Application.Services;
 
 public class TaxCalculatorFactory : ITaxCalculatorFactory
 {
-    public ITaxCalculator GetCalculatorInstance(string countryCode) => countryCode switch
+    private readonly IEnumerable<ITaxCalculator> _taxCalculators;
+
+    public TaxCalculatorFactory(IEnumerable<ITaxCalculator> taxCalculators)
     {
-        "GBR" => new UkTaxCalculator(),
-        "AUS" => new AustraliaTaxCalculator(),
-        _ => new NoTaxCalculator()
-    };
+        _taxCalculators = taxCalculators.NotNull();
+    }
+
+    public ITaxCalculator GetCalculatorInstance(string countryCode)
+    {
+        var taxCalculator = _taxCalculators.FirstOrDefault(x => x.CanHandle(countryCode));
+        if (taxCalculator == null)
+            return new NoTaxCalculator();
+
+        return taxCalculator;
+    }
 }
