@@ -16,6 +16,8 @@ public static class ServiceExtensions
         services.AddTransient<IOrderService, OrderService>();
         services.AddTransient<ICartService, CartService>();
         services.AddTransient<IUserService, UserService>();
+        services.AddTransient<ITokenUserService, UserService>();
+        services.AddTransient<IAdminUserService, UserService>();
         services.AddTransient<IReportService, ReportService>();
         services.AddTransient<IPasswordService, PasswordService>();
         services.AddTransient<IPasswordHasher<User>, PasswordHasher<User>>();

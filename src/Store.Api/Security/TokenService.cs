@@ -11,8 +11,8 @@ public class TokenService
 {
     private readonly JwtConfig _config;
     private readonly IPasswordService _passwordService;
-    private readonly IUserService _userService;
-    public TokenService(JwtConfig config, IPasswordService passwordService, IUserService userService)
+    private readonly ITokenUserService _userService;
+    public TokenService(JwtConfig config, IPasswordService passwordService, ITokenUserService userService)
     {
         _config = config.NotNull();
         _passwordService = passwordService.NotNull();

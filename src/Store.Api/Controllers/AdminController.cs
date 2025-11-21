@@ -15,11 +15,11 @@ namespace Store.Api.Controllers;
 [Authorize(Roles = Roles.AdminRole)]
 public class AdminController : BaseController<User>
 {
-    private readonly IUserService _userService;
+    private readonly IAdminUserService _userService;
     private readonly IReportService _reportService;
     private readonly IValidator<CreateUserRequest> _createUserValidator;
     public AdminController(
-        IUserService userService,
+        IAdminUserService userService,
         IReportService reportService,
         IValidator<CreateUserRequest> createUserValidator
     )

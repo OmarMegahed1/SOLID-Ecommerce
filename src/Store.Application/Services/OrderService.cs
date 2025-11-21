@@ -12,9 +12,9 @@ public class OrderService : IOrderService
     private readonly IWriteOrder _writeOrder;
     private readonly IReadCart _readCart;
     private readonly ITaxCalculatorFactory _taxCalculatorFactory;
-    private readonly IUserService _userService;
+    private readonly IAdminUserService _userService;
 
-    public OrderService(IReadOrders readOrders, IWriteOrder writeOrder, IReadCart readCart, ITaxCalculatorFactory taxCalculatorFactory, IUserService userService)
+    public OrderService(IReadOrders readOrders, IWriteOrder writeOrder, IReadCart readCart, ITaxCalculatorFactory taxCalculatorFactory, IAdminUserService userService)
     {
         _readOrders = readOrders.NotNull();
         _writeOrder = writeOrder.NotNull();

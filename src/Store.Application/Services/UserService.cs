@@ -3,10 +3,11 @@ using Store.Application.Models;
 using Store.Common.Results;
 using Store.Common.Helpers;
 using Store.Infrastructure.Data;
+using Microsoft.AspNetCore.Identity;
 
 namespace Store.Application.Services;
 
-public class UserService : IUserService
+public class UserService : IUserService, ITokenUserService, IAdminUserService
 {
     private readonly IUserRepository _userRepository;
     private readonly IPasswordService _passwordService;
@@ -61,6 +62,15 @@ public class UserService : IUserService
         return new SuccessResult<User>(userResult.Map());
     }
 
+public async Task<Result> UpdatePasswordAsync(int userId, string password, CancellationToken cancellationToken)
+    {
+        return await _passwordService.UpdatePasswordAsync(userId, password, cancellationToken);
+    }
+
+    public async Task<Result> VerifyPassword(string email, string password, CancellationToken cancellationToken)
+    {
+        return await _passwordService.VerifyPassword(email, password, cancellationToken);
+    }
     public async Task<Result<User>> CreateAdminUserAsync(User user, string password, CancellationToken cancellationToken)
     {
         var hashedPassword = _passwordService.HashPassword(password);
