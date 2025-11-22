@@ -3,27 +3,20 @@ using Store.Application.Models;
 using Store.Common.Results;
 using Store.Common.Helpers;
 using Store.Infrastructure.Data;
-using Microsoft.AspNetCore.Identity;
 
 namespace Store.Application.Services;
 
-public class UserService : IUserService, ITokenUserService, IAdminUserService
+public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
     private readonly IPasswordService _passwordService;
-    public UserService(IUserRepository userRepository, IPasswordService passwordService)
+    private readonly IPasswordRepository _passwordRepository;
+
+    public UserService(IUserRepository userRepository, IPasswordService passwordService, IPasswordRepository passwordRepository)
     {
         _userRepository = userRepository.NotNull();
         _passwordService = passwordService.NotNull();
-    }
-
-    public async Task<Result<User>> GetUserAsync(string email, CancellationToken cancellationToken)
-    {
-        var user = await _userRepository.GetUserAsync(email, cancellationToken);
-        if (user == null)
-            return new NotFoundResult<User>();
-
-        return new SuccessResult<User>(user.Map());
+        _passwordRepository = passwordRepository.NotNull();
     }
 
     public async Task<Result<User>> GetUserAsync(int userId, CancellationToken cancellationToken)
@@ -62,28 +55,13 @@ public class UserService : IUserService, ITokenUserService, IAdminUserService
         return new SuccessResult<User>(userResult.Map());
     }
 
-public async Task<Result> UpdatePasswordAsync(int userId, string password, CancellationToken cancellationToken)
-    {
-        return await _passwordService.UpdatePasswordAsync(userId, password, cancellationToken);
-    }
-
-    public async Task<Result> VerifyPassword(string email, string password, CancellationToken cancellationToken)
-    {
-        return await _passwordService.VerifyPassword(email, password, cancellationToken);
-    }
-    public async Task<Result<User>> CreateAdminUserAsync(User user, string password, CancellationToken cancellationToken)
+    public async Task<Result> UpdatePasswordAsync(int userId, string password, CancellationToken cancellationToken)
     {
         var hashedPassword = _passwordService.HashPassword(password);
-        var newUser = user.Map(hashedPassword);
-        newUser.IsAdmin = true;
-        var userId = await _userRepository.CreateUserAsync(newUser, cancellationToken);
-        if (userId == null)
-            return new InvalidResult<User>("Invalid user details. Please update and try again.");
+        var result = await _passwordRepository.UpdatePasswordAsync(userId, hashedPassword, cancellationToken);
+        if (!result)
+            return new ErrorResult("An error occurred updating password.");
 
-        var userResult = await _userRepository.GetUserAsync(userId.Value, cancellationToken);
-        if (userResult == null)
-            return new NotFoundResult<User>();
-
-        return new SuccessResult<User>(userResult.Map());
+        return new SuccessResult();
     }
 }

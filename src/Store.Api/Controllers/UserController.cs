@@ -15,21 +15,15 @@ namespace Store.Api.Controllers;
 public class UserController : BaseController<User>
 {
     private readonly IUserService _userService;
-    private readonly IAdminUserService _adminUserService;
-    private readonly IPasswordService _passwordService;
     private readonly IValidator<UpdateUserRequest> _updateUserValidator;
     private readonly IValidator<UpdatePasswordRequest> _updatePasswordValidator;
     public UserController(
         IUserService userService,
-        IAdminUserService adminUserService,
-        IPasswordService passwordService,
         IValidator<UpdateUserRequest> updateUserValidator,
         IValidator<UpdatePasswordRequest> updatePasswordValidator
     )
     {
         _userService = userService.NotNull();
-        _adminUserService = adminUserService.NotNull();
-        _passwordService = passwordService.NotNull();
         _updateUserValidator = updateUserValidator.NotNull();
         _updatePasswordValidator = updatePasswordValidator.NotNull();
     }
@@ -38,7 +32,7 @@ public class UserController : BaseController<User>
     [Authorize]
     public async Task<IResult> GetUserAsync(CancellationToken cancellationToken = default)
     {
-        var result = await _adminUserService.GetUserAsync(UserId, cancellationToken);
+        var result = await _userService.GetUserAsync(UserId, cancellationToken);
         return result switch
         {
             SuccessResult<User> successResult => HandleSuccess(successResult.Data?.Map()),
@@ -92,7 +86,7 @@ public class UserController : BaseController<User>
         if (!validationResult.IsValid)
             return Results.ValidationProblem(validationResult.ToDictionary());
 
-        var result = await _passwordService.UpdatePasswordAsync(UserId, request.Password, cancellationToken);
+        var result = await _userService.UpdatePasswordAsync(UserId, request.Password, cancellationToken);
         return result switch
         {
             SuccessResult => Results.Ok(),

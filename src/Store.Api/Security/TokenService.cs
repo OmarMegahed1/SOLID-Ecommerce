@@ -10,22 +10,21 @@ namespace Store.Api.Security;
 public class TokenService
 {
     private readonly JwtConfig _config;
-    private readonly IPasswordService _passwordService;
-    private readonly ITokenUserService _userService;
-    public TokenService(JwtConfig config, IPasswordService passwordService, ITokenUserService userService)
+    private readonly ITokenUserService _tokenUserService;
+
+    public TokenService(JwtConfig config, ITokenUserService tokenUserService)
     {
         _config = config.NotNull();
-        _passwordService = passwordService.NotNull();
-        _userService = userService.NotNull();
+        _tokenUserService = tokenUserService.NotNull();
     }
 
     public async Task<TokenResponse> CreateTokenAsync(string email, string password, CancellationToken cancellationToken)
     {
-        var validPassword = await _passwordService.VerifyPassword(email, password, cancellationToken);
+        var validPassword = await _tokenUserService.VerifyPassword(email, password, cancellationToken);
         if (!validPassword.Success)
             return null;
 
-        var userResult = await _userService.GetUserAsync(email, cancellationToken);
+        var userResult = await _tokenUserService.GetUserAsync(email, cancellationToken);
         if (!userResult.Success)
             return null;
 
